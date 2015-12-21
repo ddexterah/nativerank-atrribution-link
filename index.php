@@ -95,8 +95,8 @@ $nr_attribution_border_color = get_option('nr_attribution_border_color');
     echo '<div id="nr-attribution-link-container" style="padding: 15px; background-color: '  . $nr_attribution_background_color . '; border: 1px solid '  . $nr_attribution_border_color . '">
     <div style="max-width: 241px; margin: 0 auto">
    ' . '
-    <p style="padding: 0px;">
-    <small><a href="http://www.nativerank.com/">Website & Seo</a> by  <a href="http://www.nativerank.com/"><img style="vertical-align: middle;" alt=Native Rank" src="' . plugins_url( 'images/image.png', __FILE__ ) . '"></a>
+    <p style="padding: 0px !important; margin: 0px">
+    <a href="http://www.nativerank.com/"><small>Website & Seo</a> by  <a href="http://www.nativerank.com/"><img style="vertical-align: middle;" alt=Native Rank" src="' . plugins_url( 'images/image.png', __FILE__ ) . '"></small></a>
     </p>
     </div></div>';
     
