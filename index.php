@@ -4,78 +4,105 @@ Plugin Name: NativeRank Atrribution Link
 Plugin URI: 
 Description: WP plugin developed specifically for the use in client sites to represent who built the site (nativerank.com) and important partner (google.com).
 Author: NativeRank 
-Version: 1.0.0
+Version: 1.0.1
 Author URI: http://nativerank.com
 */
-// Creating the widget 
-class wpb_widget extends WP_Widget {
 
-function __construct() {
-parent::__construct(
-// Base ID of your widget
-'wpb_widget', 
 
-// Widget name will appear in UI
-__('NativeRank Atrribution Link', 'wpb_widget_domain'), 
+// create custom plugin settings menu
 
-// Widget description
-array( 'description' => __( 'Adds Native Rank & SMB Logo with attribution link', 'wpb_widget_domain' ), ) 
-);
+
+add_action('admin_menu', 'my_cool_plugin_create_menu');
+
+function my_cool_plugin_create_menu() {
+
+	//create new top-level menu
+	add_menu_page('My Cool Plugin Settings', 'Attribution', 'administrator', __FILE__, 'my_cool_plugin_settings_page' , plugins_url('/images/dashboard-icon.png', __FILE__) );
+
+	//call register settings function
+	add_action( 'admin_init', 'register_my_cool_plugin_settings' );
 }
-    
+
+
+function register_my_cool_plugin_settings() {
+	//register our settings
+	register_setting( 'my-cool-plugin-settings-group', 'new_option_name' );
+	register_setting( 'my-cool-plugin-settings-group', 'some_other_option' );
+	register_setting( 'my-cool-plugin-settings-group', 'option_etc' );
+}
+
+function my_cool_plugin_settings_page() {
+?>
+<div class="wrap">
+
+<h2>Native Rank Attribution Link</h2>
+      <br />
+    <br />
+    <h3>How to display</h3>
+    <p>The way to display the attribution link is through use of shortcode:</p>
+    <h4 style="color: white; background-color: #666; width: 150px; padding: 20px; text-align:center">[nr-attribution-link]</h4>
+    <br />
+   <h3>How to Customize</h3>
+    <p>Although options for this plugin are limited there are a few you can use which you can find in appearance > customize > colors.</p>
     
    
-    
-
-// Creating widget front-end
-// This is where the action happens
-public function widget( $args, $instance ) {
-$title = apply_filters( 'widget_title', $instance['title'] );
-// before and after widget arguments are defined by themes
-echo $args['before_widget'];
-if ( ! empty( $title ) )
-echo $args['before_title'] . $title . $args['after_title'];
-
-    
-    
-    
-    
-// This is where you run the code and display the output
-echo '<div style="max-width: 241px; text-align:left; margin: 0 auto"><img src="' . plugins_url( 'images/image.png', __FILE__ ) . '">' . '<p align="center" style="margin-top: 5px"><small>Website & Seo by <a href="http://www.nativerank.com/">Native Rank</a></small></p></div>';
-
-    
-
-    
-echo $args['after_widget'];
+</div>
+<?php } ?><?php
+function Ari_customize_register( $wp_customize ) {
+  $colors = array();
+$colors[] = array(
+  'slug'=>'nr_attribution_background_color', 
+  'default' => '#333',
+  'label' => __('NR Attribution Background Color', 'Ari')
+);
+$colors[] = array(
+  'slug'=>'nr_attribution_border_color', 
+  'default' => '#88C34B',
+  'label' => __('NR Attribution Border Color', 'Ari')
+);
+foreach( $colors as $color ) {
+  // SETTINGS
+  $wp_customize->add_setting(
+    $color['slug'], array(
+      'default' => $color['default'],
+      'type' => 'option', 
+      'capability' => 
+      'edit_theme_options'
+    )
+  );
+  // CONTROLS
+  $wp_customize->add_control(
+    new WP_Customize_Color_Control(
+      $wp_customize,
+      $color['slug'], 
+      array('label' => $color['label'], 
+      'section' => 'colors',
+      'settings' => $color['slug'])
+    )
+  );
 }
-		
-// Widget Backend 
-public function form( $instance ) {
-if ( isset( $instance[ 'title' ] ) ) {
-$title = $instance[ 'title' ];
 }
-else {
-$title = __( 'Attribution Link', 'wpb_widget_domain' );
+add_action( 'customize_register', 'Ari_customize_register' );
+
+
+// [nr-attribution-link]
+function nr_att_shortcode_func( $atts ) {
+    
+    
+$nr_attribution_background_color = get_option('nr_attribution_background_color');
+$nr_attribution_border_color = get_option('nr_attribution_border_color');
+    
+    echo '<div id="nr-attribution-link-container" style="padding: 15px; background-color: '  . $nr_attribution_background_color . '; border: 1px solid '  . $nr_attribution_border_color . '">
+    <div style="max-width: 241px; margin: 0 auto">
+   ' . '
+    <p style="padding: 0px;">
+    <small><a href="http://www.nativerank.com/">Website & Seo</a> by  <a href="http://www.nativerank.com/"><img style="vertical-align: middle;" alt=Native Rank" src="' . plugins_url( 'images/image.png', __FILE__ ) . '"></a>
+    </p>
+    </div></div>';
+    
+   
 }
-// Widget admin form
+add_shortcode( 'nr-attribution-link', 'nr_att_shortcode_func' );
+
+  
 ?>
-<p>
-<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label> 
-<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
-</p>
-<?php 
-}
-	
-// Updating widget replacing old instances with new
-public function update( $new_instance, $old_instance ) {
-$instance = array();
-$instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
-return $instance;
-}
-} // Class wpb_widget ends here
-
-// Register and load the widget
-function wpb_load_widget() {
-	register_widget( 'wpb_widget' );
-}
-add_action( 'widgets_init', 'wpb_load_widget' );
